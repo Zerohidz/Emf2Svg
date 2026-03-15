@@ -7,7 +7,7 @@
 
     <!-- NuGet package metadata -->
     <PackageId>Emf2Svg</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>Zerohidz</Authors>
     <Description>A pure C# library for converting EMF (Enhanced Metafile) to SVG. No native dependencies.</Description>
     <PackageTags>emf;svg;converter;metafile;graphics</PackageTags>
