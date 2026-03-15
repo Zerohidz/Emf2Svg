@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "BbVC+sbQpt8=",
+  "success": true,
+  "projectFilePath": "/home/zerohidz/DEV/Emf2Svg/Emf2Svg.csproj",
+  "expectedPackageFiles": [
+    "/home/zerohidz/.nuget/packages/microsoft.aspnetcore.app.ref/9.0.13/microsoft.aspnetcore.app.ref.9.0.13.nupkg.sha512"
+  ],
+  "logs": []
+}
