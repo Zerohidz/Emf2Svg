@@ -1,5 +1,7 @@
 # Emf2Svg
 
+> **Disclaimer:** All code in this repository was written by [Claude Code](https://claude.ai/claude-code) (Anthropic's AI coding assistant), with the human author directing the design and verifying the output.
+
 A pure C# converter for EMF (Enhanced Metafile) to SVG. Built as a port of the
 [libemf2svg](https://github.com/kakwa/libemf2svg) C library.
 
