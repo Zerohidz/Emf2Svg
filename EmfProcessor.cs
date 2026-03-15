@@ -28,14 +28,40 @@ public static class EmfRecordType
 
 public class EmfProcessor
 {
+    /// <summary>Converts an EMF stream to SVG, writing output to a TextWriter.</summary>
+    public static void Process(Stream input, TextWriter output)
+    {
+        using var reader = new BinaryReader(input, System.Text.Encoding.UTF8, leaveOpen: true);
+        var svg = new SvgWriter(output);
+        var state = new DrawingState();
+        _ProcessCore(reader, input, svg, state);
+    }
+
+    /// <summary>Converts an EMF file to SVG and returns the SVG content as a string.</summary>
+    public static string ConvertToString(string inputPath)
+    {
+        using var fs = File.OpenRead(inputPath);
+        return ConvertToString(fs);
+    }
+
+    /// <summary>Converts an EMF stream to SVG and returns the SVG content as a string.</summary>
+    public static string ConvertToString(Stream input)
+    {
+        using var sw = new System.IO.StringWriter();
+        Process(input, sw);
+        return sw.ToString();
+    }
+
+    /// <summary>Converts an EMF file to an SVG file.</summary>
     public static void Process(string inputPath, string outputPath)
     {
         using var fs = File.OpenRead(inputPath);
-        using var reader = new BinaryReader(fs);
         using var outFile = new StreamWriter(outputPath);
-        var svg = new SvgWriter(outFile);
-        var state = new DrawingState();
+        Process(fs, outFile);
+    }
 
+    private static void _ProcessCore(BinaryReader reader, Stream fs, SvgWriter svg, DrawingState state)
+    {
         while (fs.Position < fs.Length)
         {
             uint iType = reader.ReadUInt32();
@@ -117,6 +143,7 @@ public class EmfProcessor
         svg.WriteFooter();
     }
 
+    /// <summary>Lists all EMF record types found in the file, with counts.</summary>
     public static void ListRecords(string inputPath)
     {
         using var fs = File.OpenRead(inputPath);
