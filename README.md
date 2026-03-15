@@ -2,6 +2,8 @@
 
 > **Disclaimer:** All code in this repository was written by [Claude Code](https://claude.ai/claude-code) (Anthropic's AI coding assistant), with the human author directing the design and verifying the output.
 
+> **⚠️ Experimental — not production-ready.** This library covers only a small subset of the EMF specification (common drawing primitives like lines, arcs, and basic pens). Many record types are silently skipped. The implemented handlers have not been thoroughly tested against a wide range of real-world EMF files. Do not use this in critical or production systems without validating the output against your specific files.
+
 A pure C# library for converting EMF (Enhanced Metafile) to SVG. Built as a port of the
 [libemf2svg](https://github.com/kakwa/libemf2svg) C library.
 
