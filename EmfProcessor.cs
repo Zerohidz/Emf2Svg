@@ -28,6 +28,13 @@ public static class EmfRecordType
 
 public class EmfProcessor
 {
+    /// <summary>Converts an EMF stream to SVG, writing output to a Stream.</summary>
+    public static void Process(Stream input, Stream output)
+    {
+        using var writer = new StreamWriter(output, System.Text.Encoding.UTF8, leaveOpen: true);
+        Process(input, writer);
+    }
+
     /// <summary>Converts an EMF stream to SVG, writing output to a TextWriter.</summary>
     public static void Process(Stream input, TextWriter output)
     {

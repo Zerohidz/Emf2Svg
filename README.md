@@ -2,27 +2,80 @@
 
 > **Disclaimer:** All code in this repository was written by [Claude Code](https://claude.ai/claude-code) (Anthropic's AI coding assistant), with the human author directing the design and verifying the output.
 
-A pure C# converter for EMF (Enhanced Metafile) to SVG. Built as a port of the
+A pure C# library for converting EMF (Enhanced Metafile) to SVG. Built as a port of the
 [libemf2svg](https://github.com/kakwa/libemf2svg) C library.
 
-## Usage
+## Installation
+
+```
+dotnet add package Emf2Svg
+```
+
+## Library Usage
+
+### File path → SVG string
+
+```csharp
+string svg = EmfProcessor.ConvertToString("input.emf");
+```
+
+### Stream → SVG string
+
+```csharp
+using var stream = File.OpenRead("input.emf");
+string svg = EmfProcessor.ConvertToString(stream);
+```
+
+### File path → file
+
+```csharp
+EmfProcessor.Process("input.emf", "output.svg");
+```
+
+### Stream → Stream
+
+Useful when piping into another library without touching the disk:
+
+```csharp
+using var emfStream = File.OpenRead("input.emf");
+using var svgStream = new MemoryStream();
+EmfProcessor.Process(emfStream, svgStream);
+```
+
+### EMF → SVG → PNG (with Svg.Skia)
+
+```csharp
+// dotnet add package Svg.Skia
+string svg = EmfProcessor.ConvertToString("input.emf");
+
+using var skSvg = new SKSvg();
+skSvg.FromSvg(svg);
+
+var rect = skSvg.Picture.CullRect;
+using var bitmap = new SKBitmap((int)rect.Width, (int)rect.Height);
+using var canvas = new SKCanvas(bitmap);
+canvas.DrawPicture(skSvg.Picture);
+
+using var png = bitmap.Encode(SKEncodedImageFormat.Png, 100);
+File.WriteAllBytes("output.png", png.ToArray());
+```
+
+## CLI Usage
+
+The `Emf2Svg.Cli` project provides a command-line interface:
 
 ```bash
+cd Emf2Svg.Cli
 dotnet run -- -i input.emf -o output.svg
 
 # List all record types in a file (useful for checking coverage before converting)
 dotnet run -- --list-records -i input.emf
 ```
 
-Or after publishing:
-
-```bash
-emf2svg -i input.emf -o output.svg
-```
-
 ## Features
 
 - Pure C#, no native dependencies
+- Available as a NuGet library (`Emf2Svg`) and a CLI tool (`Emf2Svg.Cli`)
 - Produces SVG output visually identical to `libemf2svg`
 - Handles the most common EMF drawing primitives:
   - Lines (`LINETO`, `MOVETOEX`)
@@ -45,8 +98,9 @@ same clip regions. Each drawing primitive becomes a `<path>` element with `strok
 
 ```
 Emf2Svg/
-├── Program.cs              CLI entry point
-├── EmfProcessor.cs         Record dispatch loop
+├── Emf2Svg.sln
+├── Emf2Svg.csproj          NuGet library
+├── EmfProcessor.cs         Public API + record dispatch loop
 ├── EmfStructs.cs           Binary structs (PointL, RectL, ColorRef, LogPen, …)
 ├── DrawingState.cs         GDI device context + object table
 ├── CoordTransform.cs       point_cal() equivalent — EMF → SVG coordinates
@@ -56,8 +110,9 @@ Emf2Svg/
 │   ├── StateHandlers.cs    Map mode, window/viewport extents, SaveDC/RestoreDC
 │   ├── ObjectHandlers.cs   Pen creation, object table, stock objects
 │   └── DrawingHandlers.cs  Lines, arcs, clipping
-└── docs/
-    └── NOTES.md            Implementation quirks and C-compatibility notes
+└── Emf2Svg.Cli/
+    ├── Emf2Svg.Cli.csproj  CLI project (references the library)
+    └── Program.cs          CLI entry point
 ```
 
 ## Building
@@ -66,7 +121,6 @@ Requires .NET 9.
 
 ```bash
 dotnet build
-dotnet run -- -i input.emf -o output.svg
 ```
 
 ## Coordinate Transform
