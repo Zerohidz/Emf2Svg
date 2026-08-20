@@ -99,15 +99,15 @@ Records are grouped by implementation difficulty. The 19 types currently handled
 | Record | Type ID | Status | Notes |
 |--------|---------|--------|-------|
 | `SAVEDC` | 33 | ✅ | |
-| `RESTOREDC` | 34 | ✅ | |
+| `RESTOREDC` | 34 | ✅ | Relative and absolute `iRelative` |
 | `SETMAPMODE` | 17 | ✅ | |
 | `SETBKMODE` | 18 | ✅ | |
 | `SETROP2` | 20 | ✅ | Ignored |
 | `SETBKCOLOR` | 25 | ✅ | |
 | `SETWINDOWEXTEX` | 9 | ✅ | |
 | `SETVIEWPORTEXTEX` | 11 | ✅ | |
-| `SETWINDOWORGEX` | 10 | ⬜ | Window origin offset |
-| `SETVIEWPORTORGEX` | 12 | ⬜ | Viewport origin offset |
+| `SETWINDOWORGEX` | 10 | ✅ | Window origin offset |
+| `SETVIEWPORTORGEX` | 12 | ✅ | Viewport origin offset |
 | `SETPOLYFILLMODE` | 19 | ⬜ | `fill-rule: evenodd/nonzero` |
 | `SETMITERLIMIT` | 58 | ⬜ | `stroke-miterlimit` |
 | `SETARCDIRECTION` | 57 | ⬜ | Arc sweep direction |

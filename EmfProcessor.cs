@@ -8,7 +8,9 @@ public static class EmfRecordType
     public const uint Header = 1;
     public const uint EOF = 14;
     public const uint SetWindowExtEx = 9;
+    public const uint SetWindowOrgEx = 10;
     public const uint SetViewportExtEx = 11;
+    public const uint SetViewportOrgEx = 12;
     public const uint SetMapMode = 17;
     public const uint SetBkMode = 18;
     public const uint SetRop2 = 20;
@@ -115,8 +117,14 @@ public class EmfProcessor
                 case EmfRecordType.SetWindowExtEx:
                     StateHandlers.HandleSetWindowExtEx(pr, state);
                     break;
+                case EmfRecordType.SetWindowOrgEx:
+                    StateHandlers.HandleSetWindowOrgEx(pr, state);
+                    break;
                 case EmfRecordType.SetViewportExtEx:
                     StateHandlers.HandleSetViewportExtEx(pr, state);
+                    break;
+                case EmfRecordType.SetViewportOrgEx:
+                    StateHandlers.HandleSetViewportOrgEx(pr, state);
                     break;
                 case EmfRecordType.CreatePen:
                     ObjectHandlers.HandleCreatePen(pr, state);
@@ -185,7 +193,9 @@ public class EmfProcessor
                 EmfRecordType.Header => "HEADER",
                 EmfRecordType.EOF => "EOF",
                 EmfRecordType.SetWindowExtEx => "SETWINDOWEXTEX",
+                EmfRecordType.SetWindowOrgEx => "SETWINDOWORGEX",
                 EmfRecordType.SetViewportExtEx => "SETVIEWPORTEXTEX",
+                EmfRecordType.SetViewportOrgEx => "SETVIEWPORTORGEX",
                 EmfRecordType.SetMapMode => "SETMAPMODE",
                 EmfRecordType.SetBkMode => "SETBKMODE",
                 EmfRecordType.SetRop2 => "SETROP2",

@@ -67,3 +67,64 @@ current pen position. This is visually imperceptible.
 
 **Why we keep it:** To match `libemf2svg` output exactly. To fix it, remove the `(int)` cast
 in the three `DrawingHandlers` methods and pass `s.CurX` / `s.CurY` directly.
+
+---
+
+## Deliberate Deviations from the Reference Output
+
+Unlike the quirks above, these are places where matching `libemf2svg` byte-for-byte was
+given up because the reference behaviour is wrong.
+
+---
+
+### 1. Mapping State Belongs to the Device Context
+
+**Location:** `DrawingState.DeviceContext`, `Handlers/StateHandlers.cs`, `CoordTransform.cs`
+
+Per MS-EMF, the state that `SAVEDC` saves and `RESTOREDC` restores includes the mapping
+mode and the window/viewport origins and extents. Metafiles rely on this: a producer will
+open a short block to draw a handful of marks under a different scale, then close it.
+
+```
+SAVEDC
+SETMAPMODE(MM_ANISOTROPIC)
+SETWINDOWEXTEX   (6, 6)
+SETVIEWPORTEXTEX (5, 6)     → x scaled to 5/6 for the marks below
+ARCTO × 7
+RESTOREDC(-1)               → scale must be back to 1:1 here
+```
+
+These eleven fields therefore live on `DeviceContext`, not on `DrawingState`:
+
+```
+MapMode
+WindowOrgX   WindowOrgY   WindowExX   WindowExY   WindowExSet
+ViewPortOrgX ViewPortOrgY ViewPortExX ViewPortExY ViewPortExSet
+```
+
+`DeviceContext.Clone()` is a `MemberwiseClone()`, so `SAVEDC` picks them up automatically.
+The `…ExSet` flags are part of the saved state too — if they leaked past a restore, a later
+`SETMAPMODE` in the restored context would activate extents that were never set in it.
+
+**Effect:** a scoped mapping block no longer bleeds into every record that follows it. Files
+that set their mapping once and never scope it are unaffected — see the golden files in
+`Emf2Svg.Tests/Golden/`.
+
+---
+
+### 2. RESTOREDC Unwinds the Stack
+
+**Location:** `Handlers/StateHandlers.cs` — `HandleRestoreDC`
+
+`RESTOREDC` used to index into the saved-state list and leave it intact, so the list only
+ever grew. With two nested blocks the second `RESTOREDC(-1)` re-read the same entry the
+first one did instead of the level above it.
+
+`iRelative` is now handled the way GDI's `RestoreDC` documents it:
+
+- **negative** — relative: `-1` is the most recent saved state, `-2` the one before it;
+- **positive** — absolute: `1` is the first `SAVEDC` in the metafile;
+- the restored entry and everything saved after it are discarded, so the next `RESTOREDC(-1)`
+  lands on the right level;
+- an index outside the stack — including `RESTOREDC` with nothing saved — is ignored and
+  leaves the DC untouched, matching GDI, where the call simply fails.
