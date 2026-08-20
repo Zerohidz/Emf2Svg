@@ -85,16 +85,18 @@ dotnet run -- --list-records -i input.emf
   - Pens and colors (`CREATEPEN`, `SELECTOBJECT`, `DELETEOBJECT`)
   - Clipping regions (`INTERSECTCLIPRECT`)
   - Device context save/restore (`SAVEDC`, `RESTOREDC`)
-  - Coordinate transforms (`SETWINDOWEXTEX`, `SETVIEWPORTEXTEX`, `SETMAPMODE`)
+  - Coordinate transforms (`SETMAPMODE`, `SETWINDOWEXTEX`/`SETWINDOWORGEX`,
+    `SETVIEWPORTEXTEX`/`SETVIEWPORTORGEX`) — scoped by `SAVEDC`/`RESTOREDC` per MS-EMF
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for a full table of all EMF record types and their
 implementation status.
 
 ## Output
 
-The SVG output format matches `libemf2svg` exactly — same path data, same stroke attributes,
-same clip regions. Each drawing primitive becomes a `<path>` element with `stroke` and
-`fill="none"`.
+The SVG output format matches `libemf2svg` — same path data, same stroke attributes, same
+clip regions. Each drawing primitive becomes a `<path>` element with `stroke` and
+`fill="none"`. Where the reference behaviour is incorrect the output deliberately differs;
+those cases are listed in [docs/NOTES.md](docs/NOTES.md).
 
 ## Project Structure
 
@@ -112,9 +114,13 @@ Emf2Svg/
 │   ├── StateHandlers.cs    Map mode, window/viewport extents, SaveDC/RestoreDC
 │   ├── ObjectHandlers.cs   Pen creation, object table, stock objects
 │   └── DrawingHandlers.cs  Lines, arcs, clipping
-└── Emf2Svg.Cli/
-    ├── Emf2Svg.Cli.csproj  CLI project (references the library)
-    └── Program.cs          CLI entry point
+├── Emf2Svg.Cli/
+│   ├── Emf2Svg.Cli.csproj  CLI project (references the library)
+│   └── Program.cs          CLI entry point
+└── Emf2Svg.Tests/
+    ├── EmfBuilder.cs       Builds synthetic EMF byte streams for tests
+    ├── ControlFiles.cs     EMFs whose output must never change
+    └── Golden/             Expected SVG for each control file
 ```
 
 ## Building
@@ -124,6 +130,16 @@ Requires .NET 9.
 ```bash
 dotnet build
 ```
+
+## Tests
+
+```bash
+dotnet test
+```
+
+The suite builds small synthetic EMF byte streams in memory (`Emf2Svg.Tests/EmfBuilder.cs`),
+so no binary fixtures are checked in. `Golden/` holds the expected SVG for a set of control
+files that must keep rendering byte-identically — a diff there is a regression.
 
 ## Coordinate Transform
 
@@ -137,7 +153,13 @@ globalScaling = imgWidth / |rclBounds.right - rclBounds.left|
 scalingX = viewPortExX / windowExX   (when both are set)
 ```
 
-For `U_MM_TEXT` (the most common map mode), `scalingX = scalingY = 1.0`.
+For `U_MM_TEXT` (the most common map mode), `scalingX = scalingY = 1.0` and the origins are
+ignored.
+
+The map mode, the window/viewport origins and the window/viewport extents are all part of the
+device context. `SAVEDC` saves them and `RESTOREDC` puts them back, so a metafile that opens a
+short anisotropic block to draw a few marks does not leak that scaling into everything drawn
+afterwards.
 
 ## Credits
 

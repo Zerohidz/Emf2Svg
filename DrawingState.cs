@@ -30,6 +30,17 @@ public class DeviceContext
     // Clip
     public int ClipId;  // 0 = no clip
 
+    // Mapping state. MS-EMF says the DC state saved by SAVEDC and restored by
+    // RESTOREDC includes the mapping mode and the window/viewport origins and
+    // extents, so these live here rather than on DrawingState.
+    public int MapMode = 1; // U_MM_TEXT
+    public double WindowOrgX, WindowOrgY;
+    public double WindowExX = 1, WindowExY = 1;
+    public bool WindowExSet;
+    public double ViewPortOrgX, ViewPortOrgY;
+    public double ViewPortExX = 1, ViewPortExY = 1;
+    public bool ViewPortExSet;
+
     public DeviceContext Clone() => (DeviceContext)MemberwiseClone();
 }
 
@@ -42,15 +53,6 @@ public class DrawingState
     public double ImgWidth, ImgHeight;
     public RectL Bounds;
     public GdiObject[]? ObjectTable;
-
-    // Map mode and window/viewport extents
-    public int MapMode = 1; // U_MM_TEXT
-    public double WindowOrgX, WindowOrgY;
-    public double WindowExX = 1, WindowExY = 1;
-    public bool WindowExSet;
-    public double ViewPortOrgX, ViewPortOrgY;
-    public double ViewPortExX = 1, ViewPortExY = 1;
-    public bool ViewPortExSet;
 
     // Current position (EMF coords)
     public double CurX, CurY;

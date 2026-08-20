@@ -11,31 +11,31 @@ public static class CoordTransform
         double windowOrgX = 0, windowOrgY = 0;
         double viewPortOrgX = 0, viewPortOrgY = 0;
 
-        switch (s.MapMode)
+        switch (s.DC.MapMode)
         {
             case 1: // U_MM_TEXT
                 scalingX = 1.0;
                 scalingY = 1.0;
                 break;
             case 7: // U_MM_ISOTROPIC
-                scalingX = (s.WindowExSet && s.ViewPortExSet) ? s.ViewPortExX / s.WindowExX : 1.0;
+                scalingX = (s.DC.WindowExSet && s.DC.ViewPortExSet) ? s.DC.ViewPortExX / s.DC.WindowExX : 1.0;
                 scalingY = scalingX;
-                windowOrgX = s.WindowOrgX; windowOrgY = s.WindowOrgY;
-                viewPortOrgX = s.ViewPortOrgX; viewPortOrgY = s.ViewPortOrgY;
+                windowOrgX = s.DC.WindowOrgX; windowOrgY = s.DC.WindowOrgY;
+                viewPortOrgX = s.DC.ViewPortOrgX; viewPortOrgY = s.DC.ViewPortOrgY;
                 break;
             case 8: // U_MM_ANISOTROPIC
-                if (s.WindowExSet && s.ViewPortExSet)
+                if (s.DC.WindowExSet && s.DC.ViewPortExSet)
                 {
-                    scalingX = s.ViewPortExX / s.WindowExX;
-                    scalingY = s.ViewPortExY / s.WindowExY;
+                    scalingX = s.DC.ViewPortExX / s.DC.WindowExX;
+                    scalingY = s.DC.ViewPortExY / s.DC.WindowExY;
                 }
                 else
                 {
                     scalingX = 1.0;
                     scalingY = 1.0;
                 }
-                windowOrgX = s.WindowOrgX; windowOrgY = s.WindowOrgY;
-                viewPortOrgX = s.ViewPortOrgX; viewPortOrgY = s.ViewPortOrgY;
+                windowOrgX = s.DC.WindowOrgX; windowOrgY = s.DC.WindowOrgY;
+                viewPortOrgX = s.DC.ViewPortOrgX; viewPortOrgY = s.DC.ViewPortOrgY;
                 break;
             default:
                 scalingX = 1.0;
@@ -53,11 +53,11 @@ public static class CoordTransform
     // Equivalent to scaleX() in emf2svg_utils.c for U_MM_TEXT
     public static double ScaleX(DrawingState s, double v)
     {
-        double scalingX = s.MapMode switch
+        double scalingX = s.DC.MapMode switch
         {
             1 => 1.0, // U_MM_TEXT
-            7 => (s.WindowExSet && s.ViewPortExSet) ? s.ViewPortExX / s.WindowExX : 1.0,
-            8 => (s.WindowExSet && s.ViewPortExSet) ? s.ViewPortExX / s.WindowExX : 1.0,
+            7 => (s.DC.WindowExSet && s.DC.ViewPortExSet) ? s.DC.ViewPortExX / s.DC.WindowExX : 1.0,
+            8 => (s.DC.WindowExSet && s.DC.ViewPortExSet) ? s.DC.ViewPortExX / s.DC.WindowExX : 1.0,
             _ => 1.0
         };
         return v * scalingX * s.GlobalScaling;
